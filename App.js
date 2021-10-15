@@ -14,7 +14,7 @@ function PedidosScreen({ navigation }) {
         onPress={() => navigation.navigate('Notifications')}
         title="Go to notifications"
       /> */}
-      <CadPedidos />
+      {/* <CadPedidos /> */}
     </View>
   );
 }

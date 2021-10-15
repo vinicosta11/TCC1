@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, ActivityIndicator, Alert, useState } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert, useState } from 'react-native';
 // import { Container } from './styles';
 import firebase from '../../config/firebase';
-// import DateTimePicker from '@react-native-community/datetimepicker';
-import moment from 'moment';
+import { TextInputMask } from 'react-native-masked-text';
 
 class CadPedidos extends Component {
     constructor(){
         super();
         this.dbRef = firebase.firestore().collection('pedidos');
+        this.dbRefItem = firebase.firestore().collection('itens');
         this.state = {
             dataPedido: '',
             dataEntrega: '',
@@ -17,6 +17,9 @@ class CadPedidos extends Component {
             endCliente: '',
             formPag: '',
             total: '',
+            produto: '',
+            qtd: '',
+            FKitens: '',
             isLoading: false
         };
     }
@@ -25,6 +28,7 @@ class CadPedidos extends Component {
         state[prop] = val;
         this.setState(state);
     }
+  
 
     Cadastrar() {
         // if(this.state.nome.toLowerCase() == )
@@ -38,15 +42,19 @@ class CadPedidos extends Component {
             //  dataPedido: moment(this.state.dataPedido).subtract(10, 'days').calendar(),
              
              // MM-DD-YYYY
-             dataPedido: new Date(this.state.dataPedido),
+             dataPedido: this.state.dataPedido,
+            //  dataPedido: this.state.dataPedido,
              dataEntrega: this.state.dataEntrega,
              nomeCliente: this.state.nomeCliente,
              telCliente: this.state.telCliente,
              endCliente: this.state.endCliente,
              formPag: this.state.formPag,
-             total: parseInt(this.state.total)
+             total: parseInt(this.state.total),
+             itens: ['produto: ' + this.state.produto + '\n' + 'qtd:' + this.state.qtd]
+            //  produto: this.state.produto
          }).then((res) => {
-             this.setState({
+            // alert(this.state.dataPedido); 
+            this.setState({
                 dataPedido: '',
                 dataEntrega: '',
                 nomeCliente: '',
@@ -55,17 +63,72 @@ class CadPedidos extends Component {
                 endCliente: '',
                 formPag: '',
                 total: '',
+                produto: '',
+                qtd:'',
                 isLoading: false,
              });
          });
+        //  
+        // 
+        // 
+        // 
+        // 
+        // 
+        // this.dbRefItem.doc().set({
+        //      produto: this.state.produto,
+        //      qtd: parseInt(this.state.qtd)
+        //  }).then((res) => {
+        //     // alert(this.state.dataPedido); 
+        //     this.setState({
+        //         produto: '',
+        //         qtd: '',
+        //         isLoading: false,
+        //      });
+        //  });
     }
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
+    // 
 
   render(){
+    // const [inputs, setInputs] = useState([{key: '', value: ''}]);
+
+    // const addHandler = ()=>{
+    //   const _inputs = [...inputs];
+    //   _inputs.push({key: '', value: ''});
+    //   setInputs(_inputs);
+    // }
+    
+    // const deleteHandler = (key)=>{
+    //   const _inputs = inputs.filter((input,index) => index != key);
+    //   setInputs(_inputs);
+    // }
+  
+    // const inputHandler = (text, key)=>{
+    //   const _inputs = [...inputs];
+    //   _inputs[key].value = text;
+    //   _inputs[key].key   = key;
+    //   setInputs(_inputs);
+      
+    // }
+
     return(
         <ScrollView>
             <View style={{flex:1, paddingTop:20}}>
                 <View style={styleCad.Input}>
-                    <TextInput
+                    <TextInputMask
+                        refInput={(ref) => this.myDateText = ref}
+                        type={'datetime'}
+                        options={{
+                            format: 'DD/MM/YY'
+                        }}
                         value={this.state.dataPedido}
                         onChangeText={(val) => this.inputValueUpdate(val, 'dataPedido')}
                         style={styleCad.txtInput}
@@ -74,10 +137,17 @@ class CadPedidos extends Component {
                         // label="Nome" 
                         // placeholder="Digite aqui" />
                         placeholder="Data do Pedido"
+                        keyboardType="numeric"
+                        returnKeyType="next"
                         />
                 </View>
                 <View style={styleCad.Input}>
-                    <TextInput
+                    <TextInputMask
+                        refInput={(ref) => this.myDateText = ref}
+                        type={'datetime'}
+                        options={{
+                            format: 'DD/MM/YY'
+                        }}
                         value={this.state.dataEntrega}
                         onChangeText={(val) => this.inputValueUpdate(val, 'dataEntrega')}
                         style={styleCad.txtInput}
@@ -86,7 +156,9 @@ class CadPedidos extends Component {
                         mode='outlined' 
                         // label="Custo de Produção"
                         // placeholder="Digite aqui" />
-                        placeholder="Data de Entrega" />
+                        placeholder="Data de Entrega" 
+                        keyboardType="numeric"
+                        />
                 </View>
                 <View style={styleCad.Input}>
                     <TextInput 
@@ -98,10 +170,18 @@ class CadPedidos extends Component {
                         mode='outlined'
                         // label="Valor de Venda" 
                         // placeholder="Digite aqui" />
-                        placeholder="Nome do Cliente" />
+                        placeholder="Nome do Cliente" 
+                        maxLength={50}/>
                 </View>
                 <View style={styleCad.Input}>
-                    <TextInput 
+                    <TextInputMask 
+                        refInput={(ref) => this.myTelText = ref}
+                        type={'cel-phone'}
+                        options={{
+                            maskType:'BRL',
+                            withDDD: true,
+                            dddMask:'(99)'
+                        }}
                         value={this.state.telCliente}
                         onChangeText={(val) => this.inputValueUpdate(val, 'telCliente')}
                         style={styleCad.txtInput}
@@ -145,6 +225,44 @@ class CadPedidos extends Component {
                         // placeholder="Digite aqui" />
                         placeholder="Total" />
                 </View>
+                {/*  */}
+                {/* <View style={styleCad.InputItem}>
+                    {inputs.map((input,key) => (
+                        <View>
+                            <View style={{flex:1}}>
+                            <TextInput
+                                // value={this.state.produto}
+                                // onChangeText={(val) => this.inputValueUpdate(val, 'produto')}
+                                value={input.value}
+                                onChangeText={(text) => inputHandler(text, key)}
+                                style={styleCad.txtInput} 
+                                autoCorrect={false} 
+                                mode='outlined' 
+                                // label="Comentários" 
+                                // placeholder="Digite aqui" />
+                                placeholder="Produto" />
+                        </View>
+                        <View style={{flex:1,}}>
+                            <TextInput
+                                value={this.state.qtd}
+                                onChangeText={(val) => this.inputValueUpdate(val, 'qtd')}
+                                style={styleCad.txtInput} 
+                                autoCorrect={false} 
+                                mode='outlined' 
+                                // label="Comentários" 
+                                // placeholder="Digite aqui" />
+                                placeholder="Quantidade" />
+                        </View>
+                    </View>
+                    ))}
+                    <View style={{width:45, height:10, paddingLeft:10,}}>
+                        <Button title="+" 
+                            color='#069'
+                            onPress={addHandler}
+                             />
+                    </View>
+                </View> */}
+                {/*  */}
                 <View style={{padding:10}}>
                     <Button title="Salvar" 
                         color='#069'
@@ -165,6 +283,17 @@ const styleCad = StyleSheet.create({
     Input:{
         paddingBottom:15,
         paddingHorizontal: 10,
+    },
+    InputItem:{
+        paddingBottom:15,
+        paddingHorizontal: 10,
+        flexDirection:'row',
+    },
+    InputItemNome:{
+        // paddingRight: 100
+    },
+    InputItemQtd:{
+        
     }
 })
 
